@@ -23,6 +23,12 @@ line-length = 100
 extend-include = ["*.ipynb"]
 extend-exclude = [".venv"]
 
+[tool.ruff.format]
+# Vlastní formátování pyproject nespouští - trigger je "format on save"
+# v .vscode/settings.json, případně `ruff format .` ručně. Tady jsou jen jeho volby;
+# zbytek (dvojité uvozovky, odsazení mezerami, `line-length` z [tool.ruff]) je výchozí.
+docstring-code-format = true
+
 [tool.ruff.lint]
 # K výchozí sadě přidáváme seřazení importů (I), modernizaci syntaxe (UP),
 # běžné chyby (B) a pravidla specifická pro NumPy (NPY).

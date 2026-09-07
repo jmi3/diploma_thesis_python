@@ -1,0 +1,22 @@
+{
+  // Formátování a lint řeší ruff podle pyproject.toml v kořeni repozitáře.
+  // Potřebuje rozšíření charliermarsh.ruff.
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+
+  // Totéž pro buňky v .ipynb.
+  "notebook.formatOnSave.enabled": true,
+  "notebook.codeActionsOnSave": {
+    "notebook.source.fixAll": "explicit",
+    "notebook.source.organizeImports": "explicit"
+  },
+
+  // Použij ruff z .venv (verze je pinnutá v dev groupě), ne ten zabalený v rozšíření.
+  "ruff.importStrategy": "fromEnvironment"
+}
