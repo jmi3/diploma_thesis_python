@@ -1,0 +1,41 @@
+# Kód v `src/` se importuje jako `src.*` z kořenového adresáře repozitáře,
+# balíček se neinstaluje - proto zde není `[build-system]`.
+
+[project]
+name = "diploma-thesis-python"
+version = "0.1.0"
+description = "Numerika hyperboloidální evoluce (vlnová rovnice, SBP schémata)"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.0",
+    "matplotlib>=3.9",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16",
+    "jupyterlab>=4.0",
+    "ipykernel>=7.0",
+]
+
+[tool.ruff]
+line-length = 100
+extend-include = ["*.ipynb"]
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+# K výchozí sadě přidáváme seřazení importů (I), modernizaci syntaxe (UP),
+# běžné chyby (B) a pravidla specifická pro NumPy (NPY).
+extend-select = ["I", "UP", "B", "NPY"]
+
+# `raise Exception(...)` na zastavení běhu při nesmyslném vstupu je tu v pořádku,
+# vlastní hierarchie výjimek by byla zbytečná.
+ignore = ["TRY002"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
+[tool.ruff.lint.per-file-ignores]
+# V notebookech jsou importy běžně rozesety mezi buňkami a poslední výraz
+# buňky se nechává jako výstup.
+"*.ipynb" = ["E402", "B018"]

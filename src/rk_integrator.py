@@ -37,6 +37,7 @@ RK_COEFFICIENT_TABLES = {
     ),
 }
 
+
 class RKp:
     def __init__(self, order: int = 4):
         """

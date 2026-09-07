@@ -1,11 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
 from matplotlib.animation import FuncAnimation
 
 from src.derivatives import deriv_r_o4
+from src.rk_integrator import RKp
 from src.we_systems import ndim_lin_wave_equation_rhs
-from src.rk_integrator import RKp, RK_COEFFICIENT_TABLES
 
 # --- Parametry gridu ---
 dr = 0.01
@@ -52,16 +51,15 @@ print(f"Počáteční data připravena. Celková délka vektoru y0: {len(y0)} (3
 
 # Máme 4. řád derivace, proto raději 6. řád RK
 solver = RKp(order=6)
-solver.Initialize(y0, ndim_lin_wave_equation_rhs(r, 3, dr, 0.1))
+solver.Initialize(y0, ndim_lin_wave_equation_rhs(r, 3, dr, 0.1, N))
 solver.Integrate(t0=tmin, h=timestep, tmax=tmax)
 
-print(f"Integrace ukončena")
+print("Integrace ukončena")
 
 # Převedení historie na numpy array [časové_kroky, prostorové_body]
 history_full = np.array(solver.GetHistory())
 
 history = history_full[:, 0:N]  # extrahujeme pouze psi (prvních N prvků)
-
 
 
 # --- ANIMACE ---
@@ -83,6 +81,13 @@ def update(frame):
     return (line,)
 
 
-ani = FuncAnimation(fig, update, frames=len(history) // every_nth_frame, interval=20*(every_nth_frame//10), blit=True, cache_frame_data=False)
+ani = FuncAnimation(
+    fig,
+    update,
+    frames=len(history) // every_nth_frame,
+    interval=20 * (every_nth_frame // 10),
+    blit=True,
+    cache_frame_data=False,
+)
 
 plt.show()
