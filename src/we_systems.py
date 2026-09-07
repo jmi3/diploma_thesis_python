@@ -8,7 +8,7 @@ def ndim_lin_wave_equation_rhs(
     r_coordinate: np.ndarray, dimension_n: int, dx: float, gamma2: float, N_of_points: int
 ):
     r_to_n_minus_1 = r_coordinate ** (dimension_n - 1)
-    phi_times_r_to_n_minus_1_parity = Parity.Odd if N_of_points % 2 == 1 else Parity.Even
+    phi_times_r_to_n_minus_1_parity = Parity.Odd if dimension_n % 2 == 1 else Parity.Even
 
     def _system(t: float, y: np.ndarray):
         """
