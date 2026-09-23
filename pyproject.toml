@@ -21,7 +21,9 @@ dev = [
 [tool.ruff]
 line-length = 100
 extend-include = ["*.ipynb"]
-extend-exclude = [".venv"]
+# `docs/` je cizí referenční kód, `notebooks/colab_ntbks/` se stahuje z Colabu
+# a přeformátováním by se jen rozbil diff proti tomu, co je nahoře.
+extend-exclude = [".venv", "docs", "notebooks/colab_ntbks"]
 
 [tool.ruff.format]
 # Vlastní formátování pyproject nespouští - trigger je "format on save"
