@@ -42,11 +42,8 @@ class RKp:
     def __init__(self, order: int = 4):
         """
         Args:
-            t0 (float): Starting time
-            h (float): Time step
-            dydt (function): function in shape  dy/dt = f(t, y)
-            tmax (float, optional): Stopping time of integration. Defaults to None.
-            order (int, optional): Order of RK method used. Currently implemented are {1,2,3,4,5}. Defaults to 4.
+            order (int, optional): Řád použité RK metody. Implementované jsou klíče
+                RK_COEFFICIENT_TABLES, tj. {1,2,3,4,5,6}. Defaults to 4.
         """
 
         self.order = order
@@ -57,27 +54,52 @@ class RKp:
 
     # initialization of values before integration process begins
     def Initialize(self, y0: np.ndarray, dydt):
-        if len(y0) % 2 == 1:
-            raise Exception("Wrong length of initial vector")
+        """
+        Args:
+            y0 (np.ndarray): Počáteční data. Integrátor jejich vnitřní strukturu neřeší
+                (kolik polí je slepené za sebou je věc `dydt`, ne integrátoru).
+            dydt (function): function in shape  dy/dt = f(t, y)
+        """
         self.y = y0.copy()
         self.ICS = y0.copy()
-        self.y_history = [y0.copy()]
         self.dydt = dydt
+        self.t0 = 0.0
+        self.t = 0.0
+        self.h = 0.0
+        self.step_index = 0
+        self.y_history = [y0.copy()]
+        self.t_history = [0.0]
 
     # integrate the given system
-    def Integrate(self, t0: float, h: float, tmax: float):
+    def Integrate(self, t0: float, h: float, tmax: float, output_every: int = 1):
+        """
+        Odintegruje přesně `round((tmax - t0) / h)` kroků o pevné délce `h`. Časová osa
+        je díky tomu ekvidistantní (`t_i = t0 + i * h`) a `tmax` se zaokrouhlí na
+        nejbližší násobek `h`. Volání resetuje běh na počáteční data z `Initialize`.
+
+        Args:
+            t0 (float): Starting time
+            h (float): Time step
+            tmax (float): Stopping time of integration
+            output_every (int, optional): Do historie se zapisuje každý `output_every`-tý
+                krok; počáteční a koncový stav vždy. Defaults to 1.
+        """
+        if h <= 0:
+            raise ValueError("Krok h musí být kladný.")
+        if output_every < 1:
+            raise ValueError("output_every musí být alespoň 1.")
+
         self.t0 = t0
         self.t = t0
         self.h = h
+        self.step_index = 0
+        self.y = self.ICS.copy()
+        self.y_history = [self.ICS.copy()]
+        self.t_history = [t0]
 
-        while True:
-            if self.t + h < tmax:
-                self.NextStep()
-            else:
-                if tmax - self.t > 1e-14:
-                    self.h = tmax - self.t
-                    self.NextStep()
-                break
+        n_steps = round((tmax - t0) / h)
+        for i in range(1, n_steps + 1):
+            self.NextStep(store=(i % output_every == 0 or i == n_steps))
 
     # calculate ks for general Butcher table
     def _getKs(self):
@@ -94,18 +116,26 @@ class RKp:
         return k.copy()
 
     # perform one step of RKp method
-    def NextStep(self):
+    def NextStep(self, store: bool = True):
         # obtain k values
         k = self._getKs()
         # update y and t values
         self.y += self.h * sum(self.b[i] * k[i] for i in range(len(self.c)))
-        self.t += self.h
+        self.step_index += 1
+        # čas z indexu kroku, ne akumulací t += h -- ta po desetitisících kroků driftuje
+        self.t = self.t0 + self.step_index * self.h
         # save y value
-        self.y_history.append(self.y.copy())
-        return (self.t - self.t0) // self.h
+        if store:
+            self.y_history.append(self.y.copy())
+            self.t_history.append(self.t)
+        return self.step_index
 
     def GetHistory(self):
         return self.y_history
+
+    def GetTimes(self):
+        """Časy odpovídající řádkům `GetHistory()`."""
+        return self.t_history
 
     @classmethod
     def GetAllImplemented(cls):
